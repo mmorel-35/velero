@@ -795,7 +795,7 @@ func WaitForVSphereUploadCompletion(ctx context.Context, timeout time.Duration, 
 			// * Uploaded:       end state, snapshot has been protected
 			// * UploadFailed:   end state, unable to move to durable storage
 			// * Canceling:      when the SanpshotCancel flag is set, if the Snapshot has not already moved into a terminal state, the
-			//                   status will move to Canceling.  The snapshot ID will be removed from the status status if has been filled in
+			//                   status will move to Canceling.  The snapshot ID will be removed from the status if the status has been filled in
 			//                   and the snapshot ID will not longer be valid for a Clone operation
 			// * Canceled:       the operation was canceled, the snapshot ID is not valid
 			if len(comps) == 2 {
