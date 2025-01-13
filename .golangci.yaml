@@ -338,7 +338,6 @@ issues:
       text: "DefaultVolumesToRestic" # No need to report deprecate for DefaultVolumesToRestic.
     - path: ".*_test.go$"
       linters:
-        - errcheck
         - goconst
         - gosec
         - govet
@@ -348,7 +347,6 @@ issues:
         - unused
     - path: test/
       linters:
-        - errcheck
         - goconst
         - gosec
         - nilerr
