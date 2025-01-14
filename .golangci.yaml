@@ -240,7 +240,6 @@ linters-settings:
       - name: context-as-argument
         disabled: true
       - name: context-keys-type
-        disabled: false
       - name: dot-imports
         disabled: true
       - name: early-return
@@ -262,7 +261,6 @@ linters-settings:
       - name: indent-error-flow
         disabled: true
       - name: range
-        disabled: false
       - name: receiver-naming
         disabled: true
       - name: redefines-builtin-id
@@ -272,19 +270,16 @@ linters-settings:
         arguments:
           - "preserveScope"
       - name: time-naming
-        disabled: false
       - name: unexported-return
         disabled: true
       - name: unnecessary-stmt
         disabled: true
       - name: unreachable-code
-        disabled: false
       - name: unused-parameter
         disabled: true
       - name: use-any
         disabled: true
       - name: var-declaration
-        disabled: true
       - name: var-naming
         disabled: true
     
