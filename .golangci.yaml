@@ -284,7 +284,7 @@ linters-settings:
       - name: use-any
         disabled: true
       - name: var-declaration
-        disabled: true
+        disabled: false
       - name: var-naming
         disabled: true
     
