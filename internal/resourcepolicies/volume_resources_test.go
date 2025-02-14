@@ -132,9 +132,7 @@ func TestStorageClassConditionMatch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			match := tt.condition.match(tt.volume)
-			if match != tt.expectedMatch {
-				t.Errorf("expected %v, but got %v", tt.expectedMatch, match)
-			}
+			assert.Equalf(t, tt.expectedMatch, match, "expected %v, but got %v", tt.expectedMatch, match)
 		})
 	}
 }
@@ -186,9 +184,7 @@ func TestNFSConditionMatch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			match := tt.condition.match(tt.volume)
-			if match != tt.expectedMatch {
-				t.Errorf("expected %v, but got %v", tt.expectedMatch, match)
-			}
+			assert.Equalf(t, tt.expectedMatch, match, "expected %v, but got %v", tt.expectedMatch, match)
 		})
 	}
 }
@@ -246,9 +242,7 @@ func TestCSIConditionMatch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			match := tt.condition.match(tt.volume)
-			if match != tt.expectedMatch {
-				t.Errorf("expected %v, but got %v", tt.expectedMatch, match)
-			}
+			assert.Equalf(t, tt.expectedMatch, match, "expected %v, but got %v", tt.expectedMatch, match)
 		})
 	}
 }
@@ -381,9 +375,7 @@ func TestParsePodVolume(t *testing.T) {
 					t.Errorf("CSI volume attributes does not match expected value")
 				} else {
 					for k, v := range tc.expectedCSI.VolumeAttributes {
-						if structuredVolume.csi.VolumeAttributes[k] != v {
-							t.Errorf("CSI volume attributes does not match expected value")
-						}
+						assert.Equalf(t, structuredVolume.csi.VolumeAttributes[k], v, "CSI volume attributes does not match expected value")
 					}
 				}
 			}
@@ -458,9 +450,7 @@ func TestParsePV(t *testing.T) {
 					t.Errorf("CSI volume attributes does not match expected value")
 				} else {
 					for k, v := range tc.expectedCSI.VolumeAttributes {
-						if structuredVolume.csi.VolumeAttributes[k] != v {
-							t.Errorf("CSI volume attributes does not match expected value")
-						}
+						assert.Equalf(t, structuredVolume.csi.VolumeAttributes[k], v, "CSI volume attributes does not match expected value")
 					}
 				}
 			}

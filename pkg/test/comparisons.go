@@ -50,9 +50,7 @@ func CompareActions(t *testing.T, expected, actual []core.Action) {
 				break
 			}
 		}
-		if !found {
-			t.Errorf("missing expected action %#v", e)
-		}
+		assert.Truef(t, found, "missing expected action %#v", e)
 	}
 
 	for _, a := range actual {
@@ -63,9 +61,7 @@ func CompareActions(t *testing.T, expected, actual []core.Action) {
 				break
 			}
 		}
-		if !found {
-			t.Errorf("unexpected action %#v", a)
-		}
+		assert.Truef(t, found, "unexpected action %#v", a)
 	}
 }
 
@@ -76,7 +72,7 @@ func CompareActions(t *testing.T, expected, actual []core.Action) {
 func ValidatePatch(t *testing.T, action core.Action, expected any, decodeFunc func(*json.Decoder) (any, error)) {
 	t.Helper()
 	patchAction, ok := action.(core.PatchAction)
-	require.True(t, ok, "action is not a PatchAction")
+	require.Truef(t, ok, "action is not a PatchAction")
 
 	decoder := json.NewDecoder(bytes.NewReader(patchAction.GetPatch()))
 	decoder.DisallowUnknownFields()
@@ -101,10 +97,8 @@ func AssertDeepEqual(t *testing.T, expected, actual any) bool {
 	t.Helper()
 	// By default, the equality.Semantic object doesn't have a function for comparing time.Times
 	err := equality.Semantic.AddFunc(TimesAreEqual)
-	if err != nil {
-		// Programmer error, the test should die.
-		t.Fatalf("Could not register equality function: %s", err)
-	}
+	// Programmer error, the test should die.
+	require.NoErrorf(t, err, "Could not register equality function: %s", err)
 
 	if !equality.Semantic.DeepEqual(expected, actual) {
 		s := diff.ObjectDiff(expected, actual)

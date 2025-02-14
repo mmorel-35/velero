@@ -131,10 +131,10 @@ func TestInitContainerRestoreHookPodActionExecute(t *testing.T) {
 				Restore:        tc.restore,
 			})
 			if tc.expectedErr {
-				assert.Error(t, err, "expected an error")
+				assert.Errorf(t, err, "expected an error")
 				return
 			}
-			assert.NoError(t, err, "expected no error, got %v", err)
+			assert.NoErrorf(t, err, "expected no error, got %v", err)
 
 			var pod corev1api.Pod
 			require.NoError(t, runtime.DefaultUnstructuredConverter.FromUnstructured(res.UpdatedItem.UnstructuredContent(), &pod))

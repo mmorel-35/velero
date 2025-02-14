@@ -18,6 +18,7 @@ package resourcepolicies
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	corev1api "k8s.io/api/core/v1"
 )
 
@@ -286,9 +287,7 @@ func TestGetVolumeTypeFromPV(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result := getVolumeTypeFromPV(tc.inputPV)
-			if result != tc.expected {
-				t.Errorf("Expected %s, but got %s", tc.expected, result)
-			}
+			assert.Equalf(t, tc.expected, result, "Expected %s, but got %s", tc.expected, result)
 		})
 	}
 }
@@ -568,9 +567,7 @@ func TestGetVolumeTypeFromVolume(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result := getVolumeTypeFromVolume(tc.inputVol)
-			if result != tc.expected {
-				t.Errorf("Expected %s, but got %s", tc.expected, result)
-			}
+			assert.Equalf(t, tc.expected, result, "Expected %s, but got %s", tc.expected, result)
 		})
 	}
 }

@@ -110,7 +110,7 @@ func TestParse(t *testing.T) {
 
 			res, err := p.Parse(tc.dir)
 			if tc.wantErrMsg != nil {
-				assert.ErrorIs(t, err, tc.wantErrMsg, "Error should be: %v, got: %v", tc.wantErrMsg, err)
+				assert.ErrorIsf(t, err, tc.wantErrMsg, "Error should be: %v, got: %v", tc.wantErrMsg, err)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tc.want, res)
@@ -224,7 +224,7 @@ func TestParseGroupVersions(t *testing.T) {
 
 			res, err := p.ParseGroupVersions(tc.backupDir)
 			if tc.wantErrMsg != nil {
-				assert.ErrorIs(t, err, tc.wantErrMsg, "Error should be: %v, got: %v", tc.wantErrMsg, err)
+				assert.ErrorIsf(t, err, tc.wantErrMsg, "Error should be: %v, got: %v", tc.wantErrMsg, err)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tc.want, res)

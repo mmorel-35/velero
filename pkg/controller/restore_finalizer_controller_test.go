@@ -624,12 +624,9 @@ func Test_restoreFinalizerReconciler_finishProcessing(t *testing.T) {
 				resourceTimeout: 1 * time.Second,
 			}
 			restore := builder.ForRestore(velerov1api.DefaultNamespace, "restoreName").Result()
-			if err := r.finishProcessing(velerov1api.RestorePhaseInProgress, restore, restore); (err != nil) != tt.wantErr {
-				t.Errorf("restoreFinalizerReconciler.finishProcessing() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if !tt.args.mockClientAsserts(client) {
-				t.Errorf("mockClientAsserts() failed")
-			}
+			err := r.finishProcessing(velerov1api.RestorePhaseInProgress, restore, restore)
+			assert.Equalf(t, tt.wantErr, (err != nil), "restoreFinalizerReconciler.finishProcessing() error = %v, wantErr %v", err, tt.wantErr)
+			assert.Truef(t, tt.args.mockClientAsserts(client), "mockClientAsserts() failed")
 		})
 	}
 }

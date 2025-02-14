@@ -67,14 +67,10 @@ func TestGenerateJobName1(t *testing.T) {
 			jobName := GenerateJobName(tc.repo)
 
 			// Check if the generated job name starts with the expected prefix
-			if !strings.HasPrefix(jobName, tc.expectedStart) {
-				t.Errorf("generated job name does not start with expected prefix")
-			}
+			assert.Truef(t, strings.HasPrefix(jobName, tc.expectedStart), "generated job name does not start with expected prefix")
 
 			// Check if the length of the generated job name exceeds the Kubernetes limit
-			if len(jobName) > 63 {
-				t.Errorf("generated job name exceeds Kubernetes limit")
-			}
+			assert.LessOrEqualf(t, len(jobName), 63, "generated job name exceeds Kubernetes limit")
 		})
 	}
 }

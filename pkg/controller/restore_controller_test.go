@@ -585,7 +585,7 @@ func TestRestoreReconcile(t *testing.T) {
 				Name:      test.restore.Name,
 			}})
 
-			assert.Equal(t, test.expectedErr, err != nil, "got error %v", err)
+			assert.Equalf(t, test.expectedErr, err != nil, "got error %v", err)
 
 			if test.expectedPhase == "" {
 				return

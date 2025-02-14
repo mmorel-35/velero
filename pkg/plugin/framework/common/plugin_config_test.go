@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
 
+	"github.com/stretchr/testify/assert"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 )
 
@@ -113,9 +114,7 @@ func TestGetPluginConfig(t *testing.T) {
 				t.Errorf("GetPluginConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetPluginConfig() = %v, want %v", got, tt.want)
-			}
+			assert.Truef(t, reflect.DeepEqual(got, tt.want), "GetPluginConfig() = %v, want %v", got, tt.want)
 		})
 	}
 }

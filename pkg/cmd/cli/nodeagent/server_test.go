@@ -85,17 +85,13 @@ func Test_validatePodVolumesHostPath(t *testing.T) {
 
 			for _, dir := range tt.dirs {
 				err := fs.MkdirAll(filepath.Join("/host_pods/", dir), os.ModePerm)
-				if err != nil {
-					t.Error(err)
-				}
+				assert.NoError(t, err)
 			}
 
 			kubeClient := fake.NewSimpleClientset()
 			for _, pod := range tt.pods {
 				_, err := kubeClient.CoreV1().Pods(pod.GetNamespace()).Create(context.TODO(), pod, metav1.CreateOptions{})
-				if err != nil {
-					t.Error(err)
-				}
+				assert.NoError(t, err)
 			}
 
 			s := &nodeAgentServer{

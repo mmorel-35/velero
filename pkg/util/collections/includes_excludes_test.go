@@ -115,9 +115,8 @@ func TestShouldInclude(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			includesExcludes := NewIncludesExcludes().Includes(tc.includes...).Excludes(tc.excludes...)
 
-			if got := includesExcludes.ShouldInclude((tc.item)); got != tc.want {
-				t.Errorf("want %t, got %t", tc.want, got)
-			}
+			got := includesExcludes.ShouldInclude((tc.item))
+			assert.Equalf(t, tc.want, got, "want %t, got %t", tc.want, got)
 		})
 	}
 }
@@ -160,7 +159,7 @@ func TestValidateIncludesExcludes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			errs := ValidateIncludesExcludes(tc.includes, tc.excludes)
 
-			require.Equal(t, len(tc.want), len(errs))
+			require.Len(t, errs, len(tc.want))
 
 			for i := 0; i < len(tc.want); i++ {
 				assert.Equal(t, tc.want[i].Error(), errs[i].Error())
@@ -292,12 +291,12 @@ func TestValidateNamespaceIncludesExcludes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			errs := ValidateNamespaceIncludesExcludes(tc.includes, tc.excludes)
 
-			if tc.wantErr && len(errs) == 0 {
-				t.Errorf("%s: wanted errors but got none", tc.name)
+			if tc.wantErr {
+				assert.NotEmptyf(t, errs, "%s: wanted errors but got none", tc.name)
 			}
 
-			if !tc.wantErr && len(errs) != 0 {
-				t.Errorf("%s: wanted no errors but got: %v", tc.name, errs)
+			if !tc.wantErr {
+				assert.Emptyf(t, errs, "%s: wanted no errors but got: %v", tc.name, errs)
 			}
 		})
 	}
@@ -361,7 +360,7 @@ func TestValidateScopedIncludesExcludes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			errs := ValidateScopedIncludesExcludes(tc.includes, tc.excludes)
 
-			require.Equal(t, len(tc.wantErr), len(errs))
+			require.Len(t, errs, len(tc.wantErr))
 
 			for i := 0; i < len(tc.wantErr); i++ {
 				assert.Equal(t, tc.wantErr[i].Error(), errs[i].Error())
@@ -503,9 +502,8 @@ func TestNamespaceScopedShouldInclude(t *testing.T) {
 			logger := logrus.StandardLogger()
 			scopeIncludesExcludes := GetScopeResourceIncludesExcludes(discoveryHelper, logger, tc.namespaceScopedIncludes, tc.namespaceScopedExcludes, []string{}, []string{}, *NewIncludesExcludes())
 
-			if got := scopeIncludesExcludes.ShouldInclude((tc.item)); got != tc.want {
-				t.Errorf("want %t, got %t", tc.want, got)
-			}
+			got := scopeIncludesExcludes.ShouldInclude((tc.item))
+			assert.Equalf(t, tc.want, got, "want %t, got %t", tc.want, got)
 		})
 	}
 }
@@ -677,9 +675,8 @@ func TestClusterScopedShouldInclude(t *testing.T) {
 			nsIncludeExclude := NewIncludesExcludes().Includes(tc.nsIncludes...)
 			scopeIncludesExcludes := GetScopeResourceIncludesExcludes(discoveryHelper, logger, []string{}, []string{}, tc.clusterScopedIncludes, tc.clusterScopedExcludes, *nsIncludeExclude)
 
-			if got := scopeIncludesExcludes.ShouldInclude((tc.item)); got != tc.want {
-				t.Errorf("want %t, got %t", tc.want, got)
-			}
+			got := scopeIncludesExcludes.ShouldInclude((tc.item))
+			assert.Equalf(t, tc.want, got, "want %t, got %t", tc.want, got)
 		})
 	}
 }

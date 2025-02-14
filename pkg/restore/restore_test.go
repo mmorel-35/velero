@@ -1028,15 +1028,15 @@ func TestInvalidTarballContents(t *testing.T) {
 func assertWantErrsOrWarnings(t *testing.T, wantRes Result, res Result) {
 	t.Helper()
 	if wantRes.Velero != nil {
-		assert.Equal(t, len(wantRes.Velero), len(res.Velero))
+		assert.Len(t, res.Velero, len(wantRes.Velero))
 		for i := range res.Velero {
 			assert.Contains(t, res.Velero[i], wantRes.Velero[i])
 		}
 	}
 	if wantRes.Namespaces != nil {
-		assert.Equal(t, len(wantRes.Namespaces), len(res.Namespaces))
+		assert.Len(t, res.Namespaces, len(wantRes.Namespaces))
 		for ns := range res.Namespaces {
-			assert.Equal(t, len(wantRes.Namespaces[ns]), len(res.Namespaces[ns]))
+			assert.Len(t, res.Namespaces[ns], len(wantRes.Namespaces[ns]))
 			for i := range res.Namespaces[ns] {
 				assert.Contains(t, res.Namespaces[ns][i], wantRes.Namespaces[ns][i])
 			}
@@ -2322,7 +2322,7 @@ func TestShouldRestore(t *testing.T) {
 			res, err := ctx.shouldRestore(tc.pvName, pvClient)
 			assert.Equal(t, tc.want, res)
 			if tc.wantErr != nil {
-				if assert.Error(t, err, "expected a non-nil error") {
+				if assert.Errorf(t, err, "expected a non-nil error") {
 					assert.EqualError(t, err, tc.wantErr.Error())
 				}
 			} else {
@@ -3605,7 +3605,7 @@ func assertResourceCreationOrder(t *testing.T, resourcePriorities []string, crea
 
 		// the index of the current resource must be the same as or greater than the index of
 		// the last resource we saw for the restored order to be correct.
-		assert.GreaterOrEqual(t, current, lastSeen, "%s was restored out of order", r.groupResource)
+		assert.GreaterOrEqualf(t, current, lastSeen, "%s was restored out of order", r.groupResource)
 		lastSeen = current
 	}
 }
@@ -3685,7 +3685,7 @@ func assertNonEmptyResults(t *testing.T, typeMsg string, res ...Result) {
 		total += len(r.Namespaces)
 		total += len(r.Velero)
 	}
-	assert.Positive(t, total, "Expected at least one "+typeMsg)
+	assert.Positivef(t, total, "Expected at least one "+typeMsg)
 }
 
 type harness struct {

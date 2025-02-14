@@ -22,6 +22,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/vmware-tanzu/velero/pkg/uploader"
 )
@@ -54,9 +55,7 @@ func TestThrottle_ShouldOutput(t *testing.T) {
 		output := p.outputThrottle.ShouldOutput()
 
 		// Verify the result
-		if output != tc.expectedOutput {
-			t.Errorf("Expected ShouldOutput to return %v, but got %v", tc.expectedOutput, output)
-		}
+		assert.Equalf(t, tc.expectedOutput, output, "Expected ShouldOutput to return %v, but got %v", tc.expectedOutput, output)
 	}
 }
 

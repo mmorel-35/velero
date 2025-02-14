@@ -29,6 +29,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/vmware-tanzu/velero/pkg/cmd/cli/install"
 	"github.com/vmware-tanzu/velero/test"
 	. "github.com/vmware-tanzu/velero/test/e2e/backup"
@@ -676,9 +677,7 @@ func TestE2e(t *testing.T) {
 			test.VeleroCfg.ObjectStoreProvider = test.VeleroCfg.CloudProvider
 		}
 	} else {
-		if test.VeleroCfg.ObjectStoreProvider == "" {
-			t.Error(errors.New("No object store provider specified - must be specified when using kind as the cloud provider")) // Must have an object store provider
-		}
+		assert.NotEqualf(t, "", test.VeleroCfg.ObjectStoreProvider, "No object store provider specified - must be specified when using kind as the cloud provider") // Must have an object store provider
 	}
 
 	var err error

@@ -420,9 +420,7 @@ func TestGetResourceModifiersFromConfig(t *testing.T) {
 				t.Errorf("GetResourceModifiersFromConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetResourceModifiersFromConfig() = %v, want %v", got, tt.want)
-			}
+			assert.Truef(t, reflect.DeepEqual(got, tt.want), "GetResourceModifiersFromConfig() = %v, want %v", got, tt.want)
 		})
 	}
 }
@@ -1900,9 +1898,8 @@ func TestJSONPatch_ToString(t *testing.T) {
 				Path:      tt.fields.Path,
 				Value:     tt.fields.Value,
 			}
-			if got := p.ToString(); got != tt.want {
-				t.Errorf("JSONPatch.ToString() = %v, want %v", got, tt.want)
-			}
+			got := p.ToString()
+			assert.Equalf(t, tt.want, got, "JSONPatch.ToString() = %v, want %v", got, tt.want)
 		})
 	}
 }

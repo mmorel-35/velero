@@ -164,7 +164,7 @@ func TestReconcileOfSchedule(t *testing.T) {
 
 			if test.fakeClockTime != "" {
 				testTime, err = time.Parse("2006-01-02 15:04:05", test.fakeClockTime)
-				require.NoError(t, err, "unable to parse test.fakeClockTime: %v", err)
+				require.NoErrorf(t, err, "unable to parse test.fakeClockTime: %v", err)
 			}
 			reconciler.clock = testclocks.NewFakeClock(testTime)
 
@@ -290,13 +290,13 @@ func TestGetNextRunTime(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			cronSchedule, err := cron.ParseStandard(test.schedule.Spec.Schedule)
-			require.NoError(t, err, "unable to parse test.schedule.Spec.Schedule: %v", err)
+			require.NoErrorf(t, err, "unable to parse test.schedule.Spec.Schedule: %v", err)
 
 			testClock := testclocks.NewFakeClock(time.Now())
 
 			if test.lastRanOffset != "" {
 				offsetDuration, err := time.ParseDuration(test.lastRanOffset)
-				require.NoError(t, err, "unable to parse test.lastRanOffset: %v", err)
+				require.NoErrorf(t, err, "unable to parse test.lastRanOffset: %v", err)
 
 				test.schedule.Status.LastBackup = &metav1.Time{Time: testClock.Now().Add(-offsetDuration)}
 				test.schedule.CreationTimestamp = *test.schedule.Status.LastBackup
@@ -430,7 +430,7 @@ func TestGetBackup(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			testTime, err := time.Parse("2006-01-02 15:04:05", test.testClockTime)
-			require.NoError(t, err, "unable to parse test.testClockTime: %v", err)
+			require.NoErrorf(t, err, "unable to parse test.testClockTime: %v", err)
 
 			backup := getBackup(test.schedule, testclocks.NewFakeClock(testTime).Now())
 
@@ -452,14 +452,14 @@ func TestCheckIfBackupInNewOrProgress(t *testing.T) {
 	// Create testing schedule
 	testSchedule := builder.ForSchedule("ns", "name").Phase(velerov1.SchedulePhaseEnabled).Result()
 	err := client.Create(ctx, testSchedule)
-	require.NoError(t, err, "fail to create schedule in TestCheckIfBackupInNewOrProgress: %v", err)
+	require.NoErrorf(t, err, "fail to create schedule in TestCheckIfBackupInNewOrProgress: %v", err)
 
 	// Create backup in New phase.
 	newBackup := builder.ForBackup("ns", "backup-1").
 		ObjectMeta(builder.WithLabels(velerov1.ScheduleNameLabel, "name")).
 		Phase(velerov1.BackupPhaseNew).Result()
 	err = client.Create(ctx, newBackup)
-	require.NoError(t, err, "fail to create backup in New phase in TestCheckIfBackupInNewOrProgress: %v", err)
+	require.NoErrorf(t, err, "fail to create backup in New phase in TestCheckIfBackupInNewOrProgress: %v", err)
 
 	reconciler := NewScheduleReconciler("ns", logger, client, metrics.NewServerMetrics(), false)
 	result := reconciler.checkIfBackupInNewOrProgress(testSchedule)
@@ -467,14 +467,14 @@ func TestCheckIfBackupInNewOrProgress(t *testing.T) {
 
 	// Clean backup in New phase.
 	err = client.Delete(ctx, newBackup)
-	require.NoError(t, err, "fail to delete backup in New phase in TestCheckIfBackupInNewOrProgress: %v", err)
+	require.NoErrorf(t, err, "fail to delete backup in New phase in TestCheckIfBackupInNewOrProgress: %v", err)
 
 	// Create backup in InProgress phase.
 	inProgressBackup := builder.ForBackup("ns", "backup-2").
 		ObjectMeta(builder.WithLabels(velerov1.ScheduleNameLabel, "name")).
 		Phase(velerov1.BackupPhaseInProgress).Result()
 	err = client.Create(ctx, inProgressBackup)
-	require.NoError(t, err, "fail to create backup in InProgress phase in TestCheckIfBackupInNewOrProgress: %v", err)
+	require.NoErrorf(t, err, "fail to create backup in InProgress phase in TestCheckIfBackupInNewOrProgress: %v", err)
 
 	reconciler = NewScheduleReconciler("namespace", logger, client, metrics.NewServerMetrics(), false)
 	result = reconciler.checkIfBackupInNewOrProgress(testSchedule)

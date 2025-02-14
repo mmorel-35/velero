@@ -221,8 +221,8 @@ func TestCheckContext(t *testing.T) {
 			kp := &kopiaProvider{log: logrus.New()}
 			kp.CheckContext(ctx, tc.finishChan, tc.restoreChan, tc.uploader)
 
-			if tc.expectCancel && tc.uploader != nil {
-				t.Error("Expected the uploader to be canceled")
+			if tc.expectCancel {
+				assert.Nilf(t, tc.uploader, "Expected the uploader to be canceled")
 			}
 
 			if tc.expectBackup && tc.uploader == nil && len(tc.restoreChan) > 0 {
@@ -284,12 +284,12 @@ func TestGetPassword(t *testing.T) {
 
 			password, err := kp.GetPassword(nil)
 			if tc.expectError {
-				assert.Error(t, err, "Expected an error")
+				assert.Errorf(t, err, "Expected an error")
 			} else {
-				assert.NoError(t, err, "Expected no error")
+				assert.NoErrorf(t, err, "Expected no error")
 			}
 
-			assert.Equal(t, tc.expectedPass, password, "Expected password to match")
+			assert.Equalf(t, tc.expectedPass, password, "Expected password to match")
 		})
 	}
 }

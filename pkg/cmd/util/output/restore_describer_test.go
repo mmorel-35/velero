@@ -236,7 +236,7 @@ func TestDescribeUploaderConfigForRestore(t *testing.T) {
 			d.out.Init(d.buf, 0, 8, 2, ' ', 0)
 			describeUploaderConfigForRestore(d, tc.spec)
 			d.out.Flush()
-			assert.Equal(t, tc.expected, d.buf.String(), "Output should match expected")
+			assert.Equalf(t, tc.expected, d.buf.String(), "Output should match expected")
 		})
 	}
 }

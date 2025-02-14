@@ -258,22 +258,16 @@ func TestReportSnapshotStatus(t *testing.T) {
 		switch {
 		case tc.shouldError && err == nil:
 			t.Errorf("expected error, but got nil")
-		case !tc.shouldError && err != nil:
-			t.Errorf("unexpected error: %v", err)
+		case !tc.shouldError:
+			assert.NoErrorf(t, err, "unexpected error: %v", err)
 		case tc.shouldError && err != nil:
 			expectedErr := strings.Join(tc.expectedErrors, "\n")
-			if err.Error() != expectedErr {
-				t.Errorf("unexpected error: got %v, want %v", err, expectedErr)
-			}
+			assert.Equalf(t, expectedErr, err.Error(), "unexpected error: got %v, want %v", err, expectedErr)
 		}
 
-		if result != tc.expectedResult {
-			t.Errorf("unexpected result: got %v, want %v", result, tc.expectedResult)
-		}
+		assert.Equalf(t, tc.expectedResult, result, "unexpected result: got %v, want %v", result, tc.expectedResult)
 
-		if size != tc.expectedSize {
-			t.Errorf("unexpected size: got %v, want %v", size, tc.expectedSize)
-		}
+		assert.Equalf(t, tc.expectedSize, size, "unexpected size: got %v, want %v", size, tc.expectedSize)
 	}
 }
 
@@ -567,9 +561,7 @@ func TestFindPreviousSnapshotManifest(t *testing.T) {
 			}
 
 			// Check the number of returned snapshots
-			if len(snapshots) != len(tc.expectedSnapshots) {
-				t.Errorf("Expected %d snapshots, got %d", len(tc.expectedSnapshots), len(snapshots))
-			}
+			assert.Lenf(t, tc.expectedSnapshots, len(snapshots), "Expected %d snapshots, got %d", len(tc.expectedSnapshots), len(snapshots))
 		})
 	}
 }

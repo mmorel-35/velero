@@ -34,6 +34,6 @@ func TestPluginImplementationsAreGRPCPlugins(t *testing.T) {
 
 	for _, impl := range pluginImpls {
 		_, ok := impl.(plugin.GRPCPlugin)
-		assert.True(t, ok, "plugin implementation %T does not implement the go-plugin.GRPCPlugin interface", impl)
+		assert.Truef(t, ok, "plugin implementation %T does not implement the go-plugin.GRPCPlugin interface", impl)
 	}
 }

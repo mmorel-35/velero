@@ -238,15 +238,11 @@ func TestClose(t *testing.T) {
 	t.Run("Delete existing credentials file", func(t *testing.T) {
 		// Create temporary files for the credentials and caCert
 		credentialsFile, err := os.CreateTemp("", "credentialsFile")
-		if err != nil {
-			t.Fatalf("failed to create temp file: %v", err)
-		}
+		require.NoErrorf(t, err, "failed to create temp file: %v", err)
 		defer os.Remove(credentialsFile.Name())
 
 		caCertFile, err := os.CreateTemp("", "caCertFile")
-		if err != nil {
-			t.Fatalf("failed to create temp file: %v", err)
-		}
+		require.NoErrorf(t, err, "failed to create temp file: %v", err)
 		defer os.Remove(caCertFile.Name())
 		rp := &resticProvider{
 			credentialsFile: credentialsFile.Name(),
@@ -254,22 +250,16 @@ func TestClose(t *testing.T) {
 		}
 		// Test deleting an existing credentials file
 		err = rp.Close(context.Background())
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		assert.NoErrorf(t, err, "unexpected error: %v", err)
 
 		_, err = os.Stat(rp.credentialsFile)
-		if !os.IsNotExist(err) {
-			t.Errorf("expected credentials file to be deleted, got error: %v", err)
-		}
+		assert.Truef(t, os.IsNotExist(err), "expected credentials file to be deleted, got error: %v", err)
 	})
 
 	t.Run("Delete existing caCert file", func(t *testing.T) {
 		// Create temporary files for the credentials and caCert
 		caCertFile, err := os.CreateTemp("", "caCertFile")
-		if err != nil {
-			t.Fatalf("failed to create temp file: %v", err)
-		}
+		require.NoErrorf(t, err, "failed to create temp file: %v", err)
 		defer os.Remove(caCertFile.Name())
 		rp := &resticProvider{
 			credentialsFile: "",
@@ -277,14 +267,10 @@ func TestClose(t *testing.T) {
 		}
 		err = rp.Close(context.Background())
 		// Test deleting an existing caCert file
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		assert.NoErrorf(t, err, "unexpected error: %v", err)
 
 		_, err = os.Stat(rp.caCertFile)
-		if !os.IsNotExist(err) {
-			t.Errorf("expected caCert file to be deleted, got error: %v", err)
-		}
+		assert.Truef(t, os.IsNotExist(err), "expected caCert file to be deleted, got error: %v", err)
 	})
 }
 
@@ -450,9 +436,7 @@ func TestParseUploaderConfig(t *testing.T) {
 				return
 			}
 
-			if !reflect.DeepEqual(result, testCase.expectedFlags) {
-				t.Errorf("Test case %s failed. Expected: %v, Got: %v", testCase.name, testCase.expectedFlags, result)
-			}
+			assert.Truef(t, reflect.DeepEqual(result, testCase.expectedFlags), "Test case %s failed. Expected: %v, Got: %v", testCase.name, testCase.expectedFlags, result)
 		})
 	}
 }

@@ -3996,7 +3996,7 @@ func TestBackupWithHooks(t *testing.T) {
 
 			if tc.wantHookExecutionLog != nil {
 				// as the post hook execution in async way, check the existence rather than the exact order
-				assert.Equal(t, len(tc.wantHookExecutionLog), len(podCommandExecutor.HookExecutionLog))
+				assert.Len(t, podCommandExecutor.HookExecutionLog, len(tc.wantHookExecutionLog))
 				m := map[string]struct{}{}
 				for _, entry := range podCommandExecutor.HookExecutionLog {
 					m[entry.String()] = struct{}{}
@@ -4425,7 +4425,7 @@ func assertTarballFileContents(t *testing.T, backupFile io.Reader, want map[stri
 
 	for name, wantItem := range want {
 		gotData, ok := items[name]
-		assert.True(t, ok, "did not find item %s in tarball", name)
+		assert.Truef(t, ok, "did not find item %s in tarball", name)
 		if !ok {
 			continue
 		}
@@ -4492,7 +4492,7 @@ func assertTarballOrdering(t *testing.T, backupFile io.Reader, orderedResources 
 
 		// the index of the current resource must be the same as or greater than the index of
 		// the last resource we saw for the backed-up order to be correct.
-		assert.GreaterOrEqual(t, current, lastSeen, "%s was backed up out of order", resourceName)
+		assert.GreaterOrEqualf(t, current, lastSeen, "%s was backed up out of order", resourceName)
 		lastSeen = current
 	}
 }

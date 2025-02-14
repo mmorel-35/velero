@@ -1284,7 +1284,7 @@ func TestGetPVForPVC(t *testing.T) {
 			actualPV, actualError := GetPVForPVC(tc.inPVC, fakeClient)
 
 			if tc.expectError {
-				assert.Error(t, actualError, "Want error; Got nil error")
+				assert.Errorf(t, actualError, "Want error; Got nil error")
 				assert.Nilf(t, actualPV, "Want PV: nil; Got PV: %q", actualPV)
 				return
 			}
@@ -1407,7 +1407,7 @@ func TestGetPVCForPodVolume(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			actualPVC, actualError := GetPVCForPodVolume(tc.vol, samplePod, fakeClient)
 			if tc.expectedError {
-				assert.Error(t, actualError, "Want error; Got nil error")
+				assert.Errorf(t, actualError, "Want error; Got nil error")
 				assert.Nilf(t, actualPVC, "Want PV: nil; Got PV: %q", actualPVC)
 				return
 			}

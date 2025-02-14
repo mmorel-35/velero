@@ -669,7 +669,7 @@ func TestGetPodVolumeNameForPVC(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			actualVolumeName, err := getPodVolumeNameForPVC(tc.pod, tc.pvcName)
 			if tc.expectError && err == nil {
-				assert.Error(t, err, "Want error; Got nil error")
+				assert.Errorf(t, err, "Want error; Got nil error")
 				return
 			}
 			assert.Equalf(t, tc.expectedVolumeName, actualVolumeName, "unexpected podVolumename returned. Want %s; Got %s", tc.expectedVolumeName, actualVolumeName)
@@ -882,7 +882,7 @@ func TestGetVolumesToProcess(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			actualVolumes := GetVolumesToProcess(tc.volumes, tc.volsToProcessByLegacyApproach)
-			assert.Equal(t, tc.expectedVolumes, actualVolumes, "Want Volumes List %v; Got Volumes List %v", tc.expectedVolumes, actualVolumes)
+			assert.Equalf(t, tc.expectedVolumes, actualVolumes, "Want Volumes List %v; Got Volumes List %v", tc.expectedVolumes, actualVolumes)
 		})
 	}
 }

@@ -85,11 +85,11 @@ func TestFire(t *testing.T) {
 			err := hook.Fire(entry)
 
 			require.Equal(t, test.expectedErr, err != nil)
-			require.Equal(t, len(test.expectedEntryFields), len(entry.Data))
+			require.Len(t, entry.Data, len(test.expectedEntryFields))
 
 			for key, expectedValue := range test.expectedEntryFields {
 				actualValue, found := entry.Data[key]
-				assert.True(t, found, "expected key not found: %s", key)
+				assert.Truef(t, found, "expected key not found: %s", key)
 
 				switch key {
 				// test existence of this field only since testing the value

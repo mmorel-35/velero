@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -168,12 +169,8 @@ func TestGetS3CredentialsCorrectlyUseProfile(t *testing.T) {
 				t.Errorf("GetS3Credentials() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got.AccessKeyID, tt.want.AccessKeyID) {
-				t.Errorf("GetS3Credentials() want %v", tt.want.AccessKeyID)
-			}
-			if !reflect.DeepEqual(got.SecretAccessKey, tt.want.SecretAccessKey) {
-				t.Errorf("GetS3Credentials() want %v", tt.want.SecretAccessKey)
-			}
+			assert.Truef(t, reflect.DeepEqual(got.AccessKeyID, tt.want.AccessKeyID), "GetS3Credentials() want %v", tt.want.AccessKeyID)
+			assert.Truef(t, reflect.DeepEqual(got.SecretAccessKey, tt.want.SecretAccessKey), "GetS3Credentials() want %v", tt.want.SecretAccessKey)
 		})
 	}
 }

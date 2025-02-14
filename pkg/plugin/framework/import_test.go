@@ -16,9 +16,7 @@ import (
 // Prevent https://github.com/vmware-tanzu/velero/issues/8207 and https://github.com/vmware-tanzu/velero/issues/8157
 func TestPkgImportNoCloudProvider(t *testing.T) {
 	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		t.Fatalf("No caller information")
-	}
+	require.Truef(t, ok, "No caller information")
 	t.Logf("Current test file path: %s", filename)
 	t.Logf("Current test directory: %s", filepath.Dir(filename)) // should be this package name
 	// go list -f {{.Deps}} ./<path-to-this-package-dir>

@@ -318,9 +318,7 @@ func TestVolumeHelperImpl_ShouldPerformSnapshot(t *testing.T) {
 			if tc.resourcePolicies != nil {
 				p = &resourcepolicies.Policies{}
 				err := p.BuildPolicy(tc.resourcePolicies)
-				if err != nil {
-					t.Fatalf("failed to build policy with error %v", err)
-				}
+				require.NoErrorf(t, err, "failed to build policy with error %v", err)
 			}
 			vh := NewVolumeHelperImpl(
 				p,
@@ -336,7 +334,7 @@ func TestVolumeHelperImpl_ShouldPerformSnapshot(t *testing.T) {
 
 			actualShouldSnapshot, actualError := vh.ShouldPerformSnapshot(&unstructured.Unstructured{Object: obj}, tc.groupResource)
 			if tc.expectedErr {
-				require.Error(t, actualError, "Want error; Got nil error")
+				require.Errorf(t, actualError, "Want error; Got nil error")
 				return
 			}
 
@@ -477,9 +475,7 @@ func TestVolumeHelperImpl_ShouldIncludeVolumeInBackup(t *testing.T) {
 			policies := resourcePolicies
 			p := &resourcepolicies.Policies{}
 			err := p.BuildPolicy(&policies)
-			if err != nil {
-				t.Fatalf("failed to build policy with error %v", err)
-			}
+			require.NoErrorf(t, err, "failed to build policy with error %v", err)
 			vh := &volumeHelperImpl{
 				volumePolicy:     p,
 				snapshotVolumes:  ptr.To(true),
@@ -683,9 +679,7 @@ func TestVolumeHelperImpl_ShouldPerformFSBackup(t *testing.T) {
 			if tc.resourcePolicies != nil {
 				p = &resourcepolicies.Policies{}
 				err := p.BuildPolicy(tc.resourcePolicies)
-				if err != nil {
-					t.Fatalf("failed to build policy with error %v", err)
-				}
+				require.NoErrorf(t, err, "failed to build policy with error %v", err)
 			}
 			vh := NewVolumeHelperImpl(
 				p,
@@ -698,7 +692,7 @@ func TestVolumeHelperImpl_ShouldPerformFSBackup(t *testing.T) {
 
 			actualShouldFSBackup, actualError := vh.ShouldPerformFSBackup(tc.pod.Spec.Volumes[0], *tc.pod)
 			if tc.expectedErr {
-				require.Error(t, actualError, "Want error; Got nil error")
+				require.Errorf(t, actualError, "Want error; Got nil error")
 				return
 			}
 
