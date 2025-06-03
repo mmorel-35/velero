@@ -254,26 +254,17 @@ func TestReportSnapshotStatus(t *testing.T) {
 		}
 
 		result, size, err := reportSnapshotStatus(manifest, policy.BuildTree(nil, getDefaultPolicy()))
-
-		switch {
-		case tc.shouldError && err == nil:
-			t.Errorf("expected error, but got nil")
-		case !tc.shouldError && err != nil:
-			t.Errorf("unexpected error: %v", err)
-		case tc.shouldError && err != nil:
+		if tc.shouldError {
+			assert.Error(t, err, "expected an error but got nil")
 			expectedErr := strings.Join(tc.expectedErrors, "\n")
-			if err.Error() != expectedErr {
-				t.Errorf("unexpected error: got %v, want %v", err, expectedErr)
-			}
+			assert.EqualErrorf(t, err, expectedErr, "unexpected error: got %v, want %v", err, expectedErr)
+		} else {
+			assert.NoError(t, err, "expected no error but got: %v", err)
 		}
 
-		if result != tc.expectedResult {
-			t.Errorf("unexpected result: got %v, want %v", result, tc.expectedResult)
-		}
+		assert.Equalf(t, tc.expectedResult, result, "unexpected result: got %v, want %v", result, tc.expectedResult)
 
-		if size != tc.expectedSize {
-			t.Errorf("unexpected size: got %v, want %v", size, tc.expectedSize)
-		}
+		assert.Equalf(t, tc.expectedSize, size, "unexpected size: got %v, want %v", size, tc.expectedSize)
 	}
 }
 
@@ -567,9 +558,7 @@ func TestFindPreviousSnapshotManifest(t *testing.T) {
 			}
 
 			// Check the number of returned snapshots
-			if len(snapshots) != len(tc.expectedSnapshots) {
-				t.Errorf("Expected %d snapshots, got %d", len(tc.expectedSnapshots), len(snapshots))
-			}
+			assert.Lenf(t, tc.expectedSnapshots, len(snapshots), "Expected %d snapshots, got %d", len(tc.expectedSnapshots), len(snapshots))
 		})
 	}
 }

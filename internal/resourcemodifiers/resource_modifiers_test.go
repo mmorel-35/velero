@@ -416,12 +416,11 @@ func TestGetResourceModifiersFromConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetResourceModifiersFromConfig(tt.args.cm)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetResourceModifiersFromConfig() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetResourceModifiersFromConfig() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.Error(t, err, "GetResourceModifiersFromConfig() expected an error but got none")
+			} else {
+				assert.NoError(t, err, "GetResourceModifiersFromConfig() expected no error but got: %v", err)
+				assert.Truef(t, reflect.DeepEqual(got, tt.want), "GetResourceModifiersFromConfig() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -1900,9 +1899,8 @@ func TestJSONPatch_ToString(t *testing.T) {
 				Path:      tt.fields.Path,
 				Value:     tt.fields.Value,
 			}
-			if got := p.ToString(); got != tt.want {
-				t.Errorf("JSONPatch.ToString() = %v, want %v", got, tt.want)
-			}
+			got := p.ToString()
+			assert.Equalf(t, tt.want, got, "JSONPatch.ToString() = %v, want %v", got, tt.want)
 		})
 	}
 }

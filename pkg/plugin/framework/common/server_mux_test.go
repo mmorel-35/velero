@@ -19,6 +19,8 @@ package common
 import (
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidPluginName(t *testing.T) {
@@ -38,9 +40,8 @@ func TestValidPluginName(t *testing.T) {
 	}
 	for i, tt := range successCases {
 		t.Run(tt.pluginName, func(t *testing.T) {
-			if err := ValidatePluginName(tt.pluginName, tt.existingNames); err != nil {
-				t.Errorf("case[%d]: %q: expected success: %v", i, successCases[i], err)
-			}
+			err := ValidatePluginName(tt.pluginName, tt.existingNames)
+			assert.NoErrorf(t, err, "case[%d]: %q: expected success: %v", i, successCases[i], err)
 		})
 	}
 
@@ -63,9 +64,8 @@ func TestValidPluginName(t *testing.T) {
 
 	for i, tt := range errorCases {
 		t.Run(tt.pluginName, func(t *testing.T) {
-			if err := ValidatePluginName(tt.pluginName, tt.existingNames); err == nil {
-				t.Errorf("case[%d]: %q: expected failure.", i, errorCases[i])
-			}
+			err := ValidatePluginName(tt.pluginName, tt.existingNames)
+			assert.Errorf(t, err, "case[%d]: %q: expected failure.", i, errorCases[i])
 		})
 	}
 }

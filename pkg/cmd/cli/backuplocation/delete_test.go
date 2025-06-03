@@ -61,19 +61,17 @@ func TestNewDeleteCommand(t *testing.T) {
 
 	e = Run(f, o)
 	assert.NoError(t, e)
-	if os.Getenv(cmdtest.CaptureFlag) == "1" {
-		return
-	}
+	if os.Getenv(cmdtest.CaptureFlag) != "1" {
+		cmd := exec.Command(os.Args[0], []string{"-test.run=TestNewDeleteCommand"}...)
+		cmd.Env = append(os.Environ(), fmt.Sprintf("%s=1", cmdtest.CaptureFlag))
+		stdout, _, err := veleroexec.RunCommand(cmd)
 
-	cmd := exec.Command(os.Args[0], []string{"-test.run=TestNewDeleteCommand"}...)
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=1", cmdtest.CaptureFlag))
-	stdout, _, err := veleroexec.RunCommand(cmd)
-
-	if err == nil {
-		assert.Contains(t, stdout, "No backup-locations found")
-		return
+		if err == nil {
+			assert.Contains(t, stdout, "No backup-locations found")
+		} else {
+			t.Fatalf("process ran with err %v, want backups by get()", err)
+		}
 	}
-	t.Fatalf("process ran with err %v, want backups by get()", err)
 }
 func TestDeleteFunctions(t *testing.T) {
 	//t.Run("create the other create command with fromSchedule option for Run() other branches", func(t *testing.T) {

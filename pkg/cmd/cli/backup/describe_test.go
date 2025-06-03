@@ -60,18 +60,17 @@ func TestNewDescribeCommand(t *testing.T) {
 	e := c.Execute()
 	assert.NoError(t, e)
 
-	if os.Getenv(cmdtest.CaptureFlag) == "1" {
-		return
-	}
-	cmd := exec.Command(os.Args[0], []string{"-test.run=TestNewDescribeCommand"}...)
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=1", cmdtest.CaptureFlag))
-	stdout, _, err := veleroexec.RunCommand(cmd)
+	if os.Getenv(cmdtest.CaptureFlag) != "1" {
+		cmd := exec.Command(os.Args[0], []string{"-test.run=TestNewDescribeCommand"}...)
+		cmd.Env = append(os.Environ(), fmt.Sprintf("%s=1", cmdtest.CaptureFlag))
+		stdout, _, err := veleroexec.RunCommand(cmd)
 
-	if err == nil {
-		assert.Contains(t, stdout, "Backup Volumes:")
-		assert.Contains(t, stdout, "Or label selector:  <none>")
-		assert.Contains(t, stdout, fmt.Sprintf("Name:         %s", backupName))
-		return
+		if err == nil {
+			assert.Contains(t, stdout, "Backup Volumes:")
+			assert.Contains(t, stdout, "Or label selector:  <none>")
+			assert.Contains(t, stdout, fmt.Sprintf("Name:         %s", backupName))
+		} else {
+			t.Fatalf("process ran with err %v, want backups by get()", err)
+		}
 	}
-	t.Fatalf("process ran with err %v, want backups by get()", err)
 }

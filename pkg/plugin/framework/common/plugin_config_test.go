@@ -25,6 +25,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 )
 
@@ -109,12 +111,11 @@ func TestGetPluginConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fakeClient := fake.NewSimpleClientset(tt.args.objects...)
 			got, err := GetPluginConfig(tt.args.kind, tt.args.name, fakeClient.CoreV1().ConfigMaps(velerov1.DefaultNamespace))
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetPluginConfig() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetPluginConfig() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				require.Error(t, err, "GetPluginConfig() expected an error but got none")
+			} else {
+				require.NoError(t, err, "GetPluginConfig() expected no error but got: %v", err)
+				assert.Truef(t, reflect.DeepEqual(got, tt.want), "GetPluginConfig() = %v, want %v", got, tt.want)
 			}
 		})
 	}

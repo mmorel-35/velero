@@ -19,6 +19,8 @@ package datapath
 import (
 	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetSnapshotID(t *testing.T) {
@@ -27,9 +29,7 @@ func TestGetSnapshotID(t *testing.T) {
 	// Call the GetSnapshotID method to retrieve the snapshot ID
 	snapshotID := err.GetSnapshotID()
 	// Check if the retrieved snapshot ID matches the expected value
-	if snapshotID != "123" {
-		t.Errorf("GetSnapshotID() returned unexpected snapshot ID: got %s, want %s", snapshotID, "123")
-	}
+	assert.Equalf(t, "123", snapshotID, "GetSnapshotID() returned unexpected snapshot ID: got %s, want %s", snapshotID, "123")
 }
 
 func TestError(t *testing.T) {
@@ -39,7 +39,5 @@ func TestError(t *testing.T) {
 	errMsg := err.Error()
 	// Check if the retrieved error message matches the expected value
 	expectedErrMsg := "example error"
-	if errMsg != expectedErrMsg {
-		t.Errorf("Error() returned unexpected error message: got %s, want %s", errMsg, expectedErrMsg)
-	}
+	assert.Equalf(t, expectedErrMsg, errMsg, "Error() returned unexpected error message: got %s, want %s", errMsg, expectedErrMsg)
 }

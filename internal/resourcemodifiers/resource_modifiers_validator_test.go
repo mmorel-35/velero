@@ -17,6 +17,8 @@ package resourcemodifiers
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestResourceModifiers_Validate(t *testing.T) {
@@ -163,8 +165,11 @@ func TestResourceModifiers_Validate(t *testing.T) {
 				Version:               tt.fields.Version,
 				ResourceModifierRules: tt.fields.ResourceModifierRules,
 			}
-			if err := p.Validate(); (err != nil) != tt.wantErr {
-				t.Errorf("ResourceModifiers.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			err := p.Validate()
+			if tt.wantErr {
+				assert.Errorf(t, err, "ResourceModifiers.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			} else {
+				assert.NoErrorf(t, err, "ResourceModifiers.Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -225,8 +230,11 @@ func TestJsonPatch_Validate(t *testing.T) {
 				Path:      tt.fields.Path,
 				Value:     tt.fields.Value,
 			}
-			if err := p.Validate(); (err != nil) != tt.wantErr {
-				t.Errorf("JsonPatch.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			err := p.Validate()
+			if tt.wantErr {
+				assert.Errorf(t, err, "JsonPatch.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			} else {
+				assert.NoErrorf(t, err, "JsonPatch.Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

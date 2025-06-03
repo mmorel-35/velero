@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -161,9 +162,10 @@ volumePolicies:
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := unmarshalResourcePolicies(&tc.yamlData)
-
-			if (err != nil) != tc.wantErr {
-				t.Fatalf("Expected error %v, but got error %v", tc.wantErr, err)
+			if tc.wantErr {
+				assert.Errorf(t, err, "Expected error but got none for test case: %s", tc.name)
+			} else {
+				assert.NoErrorf(t, err, "Expected no error but got %v for test case: %s", err, tc.name)
 			}
 		})
 	}
@@ -304,23 +306,14 @@ func TestGetResourceMatchedAction(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			policies := &Policies{}
 			err := policies.BuildPolicy(resPolicies)
-			if err != nil {
-				t.Errorf("Failed to build policy with error %v", err)
-			}
+			assert.NoErrorf(t, err, "Failed to build policy with error %v", err)
 
 			action := policies.match(tc.volume)
-			if action == nil {
-				if tc.expectedAction != nil {
-					t.Errorf("Expected action %v, but got result nil", tc.expectedAction.Type)
-				}
+			if tc.expectedAction != nil {
+				assert.NotNilf(t, action, "Expected action %v, but got result nil", tc.expectedAction.Type)
+				assert.Equalf(t, action.Type, tc.expectedAction.Type, "Expected action %v, but got result %v", tc.expectedAction.Type, action.Type)
 			} else {
-				if tc.expectedAction != nil {
-					if action.Type != tc.expectedAction.Type {
-						t.Errorf("Expected action %v, but got result %v", tc.expectedAction.Type, action.Type)
-					}
-				} else {
-					t.Errorf("Expected action nil, but got result %v", action.Type)
-				}
+				assert.Nilf(t, action, "Expected action nil, but got result %v", action.Type)
 			}
 		})
 	}
@@ -407,9 +400,7 @@ volumePolicies:
 
 	p := &Policies{}
 	err = p.BuildPolicy(&policies)
-	if err != nil {
-		t.Fatalf("failed to build policy: %v", err)
-	}
+	require.NoErrorf(t, err, "failed to build policy: %v", err)
 
 	assert.Equal(t, p, resPolicies)
 }
@@ -961,9 +952,7 @@ volumePolicies:
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			resPolicies, err := unmarshalResourcePolicies(&tc.yamlData)
-			if err != nil {
-				t.Fatalf("got error when get match action %v", err)
-			}
+			require.NoErrorf(t, err, "got error when get match action %v", err)
 			assert.NoError(t, err)
 			policies := &Policies{}
 			err = policies.BuildPolicy(resPolicies)
@@ -983,13 +972,12 @@ volumePolicies:
 
 			action, err := policies.GetMatchAction(vfd)
 			assert.NoError(t, err)
+			require.NotNil(t, action, "Expected action to be not nil")
 
 			if tc.skip {
-				if action.Type != Skip {
-					t.Fatalf("Expected action skip but is %v", action.Type)
-				}
-			} else if action != nil && action.Type == Skip {
-				t.Fatalf("Expected action not skip but is %v", action.Type)
+				require.Equalf(t, Skip, action.Type, "Expected action skip but is %v", action.Type)
+			} else {
+				assert.NotEqual(t, Skip, action.Type, "Expected action not skip but is %v", action.Type)
 			}
 		})
 	}
@@ -1022,8 +1010,7 @@ func TestGetMatchAction_Errors(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			action, err := p.GetMatchAction(tc.input)
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), tc.expectedErr)
+			assert.ErrorContains(t, err, tc.expectedErr)
 			assert.Nil(t, action)
 		})
 	}

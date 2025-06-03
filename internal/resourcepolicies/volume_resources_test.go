@@ -17,10 +17,10 @@ package resourcepolicies
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -232,9 +232,7 @@ func TestStorageClassConditionMatch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			match := tt.condition.match(tt.volume)
-			if match != tt.expectedMatch {
-				t.Errorf("expected %v, but got %v", tt.expectedMatch, match)
-			}
+			assert.Equalf(t, tt.expectedMatch, match, "expected %v, but got %v", tt.expectedMatch, match)
 		})
 	}
 }
@@ -286,9 +284,7 @@ func TestNFSConditionMatch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			match := tt.condition.match(tt.volume)
-			if match != tt.expectedMatch {
-				t.Errorf("expected %v, but got %v", tt.expectedMatch, match)
-			}
+			assert.Equalf(t, tt.expectedMatch, match, "expected %v, but got %v", tt.expectedMatch, match)
 		})
 	}
 }
@@ -346,9 +342,7 @@ func TestCSIConditionMatch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			match := tt.condition.match(tt.volume)
-			if match != tt.expectedMatch {
-				t.Errorf("expected %v, but got %v", tt.expectedMatch, match)
-			}
+			assert.Equalf(t, tt.expectedMatch, match, "expected %v, but got %v", tt.expectedMatch, match)
 		})
 	}
 }
@@ -436,11 +430,7 @@ func TestUnmarshalVolumeConditions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := unmarshalVolConditions(tc.input)
 			if tc.expectedError != "" {
-				if err == nil {
-					t.Errorf("Expected error '%s', but got nil", tc.expectedError)
-				} else if !strings.Contains(err.Error(), tc.expectedError) {
-					t.Errorf("Expected error '%s', but got '%v'", tc.expectedError, err)
-				}
+				assert.ErrorContainsf(t, err, tc.expectedError, "expected error '%s' but got '%v'", tc.expectedError, err)
 			}
 		})
 	}
@@ -493,27 +483,16 @@ func TestParsePodVolume(t *testing.T) {
 
 			// Check the results
 			if tc.expectedNFS != nil {
-				if structuredVolume.nfs == nil {
-					t.Errorf("Expected a non-nil NFS volume source")
-				} else if *tc.expectedNFS != *structuredVolume.nfs {
-					t.Errorf("NFS volume source does not match expected value")
-				}
+				require.NotNilf(t, structuredVolume.nfs, "Expected a non-nil NFS volume source")
+				assert.Equalf(t, *tc.expectedNFS, *structuredVolume.nfs, "NFS volume source does not match expected value")
 			}
 			if tc.expectedCSI != nil {
-				if structuredVolume.csi == nil {
-					t.Errorf("Expected a non-nil CSI volume source")
-				} else if tc.expectedCSI.Driver != structuredVolume.csi.Driver {
-					t.Errorf("CSI volume source does not match expected value")
-				}
+				require.NotNilf(t, structuredVolume.csi, "Expected a non-nil CSI volume source")
+				assert.Equalf(t, tc.expectedCSI.Driver, structuredVolume.csi.Driver, "CSI volume source does not match expected value")
 				// Check volumeAttributes
-				if len(tc.expectedCSI.VolumeAttributes) != len(structuredVolume.csi.VolumeAttributes) {
-					t.Errorf("CSI volume attributes does not match expected value")
-				} else {
-					for k, v := range tc.expectedCSI.VolumeAttributes {
-						if structuredVolume.csi.VolumeAttributes[k] != v {
-							t.Errorf("CSI volume attributes does not match expected value")
-						}
-					}
+				require.Lenf(t, structuredVolume.csi.VolumeAttributes, len(tc.expectedCSI.VolumeAttributes), "CSI volume attributes does not match expected value")
+				for k, v := range tc.expectedCSI.VolumeAttributes {
+					assert.Equalf(t, structuredVolume.csi.VolumeAttributes[k], v, "CSI volume attributes does not match expected value")
 				}
 			}
 		})
@@ -563,34 +542,19 @@ func TestParsePV(t *testing.T) {
 			structuredVolume := &structuredVolume{}
 			structuredVolume.parsePV(tc.inputVolume)
 			// Check the results
-			if structuredVolume.capacity != *tc.inputVolume.Spec.Capacity.Storage() {
-				t.Errorf("capacity does not match expected value")
-			}
-			if structuredVolume.storageClass != tc.inputVolume.Spec.StorageClassName {
-				t.Errorf("Storage class does not match expected value")
-			}
+			assert.Equalf(t, structuredVolume.capacity, *tc.inputVolume.Spec.Capacity.Storage(), "capacity does not match expected value")
+			assert.Equalf(t, structuredVolume.storageClass, tc.inputVolume.Spec.StorageClassName, "Storage class does not match expected value")
 			if tc.expectedNFS != nil {
-				if structuredVolume.nfs == nil {
-					t.Errorf("Expected a non-nil NFS volume source")
-				} else if *tc.expectedNFS != *structuredVolume.nfs {
-					t.Errorf("NFS volume source does not match expected value")
-				}
+				require.NotNilf(t, structuredVolume.nfs, "Expected a non-nil NFS volume source")
+				assert.Equalf(t, *tc.expectedNFS, *structuredVolume.nfs, "NFS volume source does not match expected value")
 			}
 			if tc.expectedCSI != nil {
-				if structuredVolume.csi == nil {
-					t.Errorf("Expected a non-nil CSI volume source")
-				} else if tc.expectedCSI.Driver != structuredVolume.csi.Driver {
-					t.Errorf("CSI volume source does not match expected value")
-				}
+				require.NotNilf(t, structuredVolume.csi, "Expected a non-nil CSI volume source")
+				assert.Equalf(t, tc.expectedCSI.Driver, structuredVolume.csi.Driver, "CSI volume source does not match expected value")
 				// Check volumeAttributes
-				if len(tc.expectedCSI.VolumeAttributes) != len(structuredVolume.csi.VolumeAttributes) {
-					t.Errorf("CSI volume attributes does not match expected value")
-				} else {
-					for k, v := range tc.expectedCSI.VolumeAttributes {
-						if structuredVolume.csi.VolumeAttributes[k] != v {
-							t.Errorf("CSI volume attributes does not match expected value")
-						}
-					}
+				require.Lenf(t, structuredVolume.csi.VolumeAttributes, len(tc.expectedCSI.VolumeAttributes), "CSI volume attributes does not match expected value")
+				for k, v := range tc.expectedCSI.VolumeAttributes {
+					assert.Equalf(t, structuredVolume.csi.VolumeAttributes[k], v, "CSI volume attributes does not match expected value")
 				}
 			}
 		})

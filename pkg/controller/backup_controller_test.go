@@ -1808,10 +1808,8 @@ func TestPatchResourceWorksWithStatus(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			scheme := runtime.NewScheme()
-			error := velerov1api.AddToScheme(scheme)
-			if error != nil {
-				t.Errorf("PatchResource() error = %v", error)
-			}
+			err := velerov1api.AddToScheme(scheme)
+			assert.NoErrorf(t, err, "PatchResource() error = %v", err)
 			fakeClient := fakeClient.NewClientBuilder().WithScheme(scheme).WithObjects(tt.args.original).Build()
 			fromCluster := &velerov1api.Backup{
 				ObjectMeta: metav1.ObjectMeta{
@@ -1820,19 +1818,20 @@ func TestPatchResourceWorksWithStatus(t *testing.T) {
 				},
 			}
 			// check original exists
-			if err := fakeClient.Get(context.Background(), kbclient.ObjectKeyFromObject(tt.args.updated), fromCluster); err != nil {
-				t.Errorf("PatchResource() error = %v", err)
-			}
+			err = fakeClient.Get(context.Background(), kbclient.ObjectKeyFromObject(tt.args.updated), fromCluster)
+			assert.NoErrorf(t, err, "PatchResource() error = %v", err)
 			// ignore resourceVersion
 			tt.args.updated.ResourceVersion = fromCluster.ResourceVersion
 			tt.args.original.ResourceVersion = fromCluster.ResourceVersion
-			if err := kubeutil.PatchResource(tt.args.original, tt.args.updated, fakeClient); (err != nil) != tt.wantErr {
-				t.Errorf("PatchResource() error = %v, wantErr %v", err, tt.wantErr)
+			err = kubeutil.PatchResource(tt.args.original, tt.args.updated, fakeClient)
+			if tt.wantErr {
+				assert.Errorf(t, err, "PatchResource() expected error but got none")
+			} else {
+				assert.NoErrorf(t, err, "PatchResource() expected no error but got %v", err)
 			}
 			// check updated exists
-			if err := fakeClient.Get(context.Background(), kbclient.ObjectKeyFromObject(tt.args.updated), fromCluster); err != nil {
-				t.Errorf("PatchResource() error = %v", err)
-			}
+			err = fakeClient.Get(context.Background(), kbclient.ObjectKeyFromObject(tt.args.updated), fromCluster)
+			assert.NoErrorf(t, err, "PatchResource() error = %v", err)
 
 			// check fromCluster is equal to updated
 			if !reflect.DeepEqual(fromCluster, tt.args.updated) {

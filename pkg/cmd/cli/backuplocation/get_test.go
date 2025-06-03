@@ -48,15 +48,15 @@ func TestNewGetCommand(t *testing.T) {
 	if os.Getenv(cmdtest.CaptureFlag) == "1" {
 		c.SetArgs([]string{"b1", "b2", "--default"})
 		c.Execute()
-		return
-	}
-	cmd := exec.Command(os.Args[0], []string{"-test.run=TestNewGetCommand"}...)
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=1", cmdtest.CaptureFlag))
-	_, stderr, err := veleroexec.RunCommand(cmd)
+	} else {
+		cmd := exec.Command(os.Args[0], []string{"-test.run=TestNewGetCommand"}...)
+		cmd.Env = append(os.Environ(), fmt.Sprintf("%s=1", cmdtest.CaptureFlag))
+		_, stderr, err := veleroexec.RunCommand(cmd)
 
-	if err != nil {
-		assert.Contains(t, stderr, fmt.Sprintf("backupstoragelocations.velero.io \"%s\" not found", bkList[0]))
-		return
+		if err != nil {
+			assert.Contains(t, stderr, fmt.Sprintf("backupstoragelocations.velero.io \"%s\" not found", bkList[0]))
+		} else {
+			t.Fatalf("process ran with err %v, want backup delete successfully", err)
+		}
 	}
-	t.Fatalf("process ran with err %v, want backup delete successfully", err)
 }

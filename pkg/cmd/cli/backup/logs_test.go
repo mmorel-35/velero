@@ -163,6 +163,6 @@ func TestNewLogsCommand(t *testing.T) {
 
 		f.On("KubebuilderClient").Return(kbClient, fmt.Errorf("test error"))
 		err := l.Complete([]string{""}, f)
-		require.Equal(t, "test error", err.Error())
+		require.EqualError(t, err, "test error")
 	})
 }
