@@ -221,12 +221,13 @@ func TestCheckContext(t *testing.T) {
 			kp := &kopiaProvider{log: logrus.New()}
 			kp.CheckContext(ctx, tc.finishChan, tc.restoreChan, tc.uploader)
 
-			if tc.expectCancel && tc.uploader != nil {
-				t.Error("Expected the uploader to be canceled")
+			if tc.expectCancel {
+				assert.Nil(t, tc.uploader, "Expected the uploader to be canceled")
 			}
 
-			if tc.expectBackup && tc.uploader == nil && len(tc.restoreChan) > 0 {
-				t.Error("Expected the restore channel to be closed")
+			if tc.expectBackup {
+				assert.NotNil(t, tc.uploader, "Expected the restore channel to be closed")
+				assert.Empty(t, tc.restoreChan, "Expected the restore channel to be closed")
 			}
 		})
 	}

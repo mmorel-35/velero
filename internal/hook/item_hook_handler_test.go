@@ -491,10 +491,9 @@ func TestHandleHooks(t *testing.T) {
 
 			if test.expectedError != nil {
 				assert.EqualError(t, err, test.expectedError.Error())
-				return
+			} else {
+				require.NoError(t, err)
 			}
-
-			require.NoError(t, err)
 		})
 	}
 }
@@ -1290,11 +1289,11 @@ func TestGetInitContainerFromAnnotations(t *testing.T) {
 			actualInitContainer := getInitContainerFromAnnotation("test/pod1", tc.inputAnnotations, velerotest.NewLogger())
 			if tc.expectNil {
 				assert.Nil(t, actualInitContainer)
-				return
+			} else {
+				assert.NotEmpty(t, actualInitContainer.Name)
+				assert.Equal(t, tc.expected.Image, actualInitContainer.Image)
+				assert.Equal(t, tc.expected.Command, actualInitContainer.Command)
 			}
-			assert.NotEmpty(t, actualInitContainer.Name)
-			assert.Equal(t, tc.expected.Image, actualInitContainer.Image)
-			assert.Equal(t, tc.expected.Command, actualInitContainer.Command)
 		})
 	}
 }
@@ -2471,11 +2470,9 @@ func TestRestoreHookTrackerAdd(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			_, _ = GroupRestoreExecHooks("restore1", tc.resourceRestoreHooks, tc.pod, velerotest.NewLogger(), tc.hookTracker)
-			if _, ok := tc.hookTracker.trackers["restore1"]; !ok {
-				return
+			if tracker, ok := tc.hookTracker.trackers["restore1"]; ok {
+				assert.Len(t, tracker, tc.expectedCnt)
 			}
-			tracker := tc.hookTracker.trackers["restore1"].tracker
-			assert.Len(t, tracker, tc.expectedCnt)
 		})
 	}
 }

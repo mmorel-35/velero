@@ -90,15 +90,15 @@ func TestNewDownloadCommand(t *testing.T) {
 		e = c.Execute()
 		defer os.Remove("bk-to-be-download-data.tar.gz")
 		assert.NoError(t, e)
-		return
-	}
-	cmd := exec.Command(os.Args[0], []string{"-test.run=TestNewDownloadCommand"}...)
-	cmd.Env = append(os.Environ(), fmt.Sprintf("%s=1", cmdtest.CaptureFlag))
-	_, stderr, err := veleroexec.RunCommand(cmd)
+	} else {
+		cmd := exec.Command(os.Args[0], []string{"-test.run=TestNewDownloadCommand"}...)
+		cmd.Env = append(os.Environ(), fmt.Sprintf("%s=1", cmdtest.CaptureFlag))
+		_, stderr, err := veleroexec.RunCommand(cmd)
 
-	if err != nil {
-		require.Contains(t, stderr, "download request download url timeout")
-		return
+		if err != nil {
+			require.Contains(t, stderr, "download request download url timeout")
+		} else {
+			t.Fatalf("process ran with err %v, want backup delete successfully", err)
+		}
 	}
-	t.Fatalf("process ran with err %v, want backup delete successfully", err)
 }

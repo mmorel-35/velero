@@ -21,6 +21,8 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	velerov1api "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 )
@@ -36,9 +38,7 @@ func TestStoreBackupConfig(t *testing.T) {
 
 	result := StoreBackupConfig(config)
 
-	if !reflect.DeepEqual(result, expectedData) {
-		t.Errorf("Expected: %v, but got: %v", expectedData, result)
-	}
+	assert.Truef(t, reflect.DeepEqual(result, expectedData), "Expected: %v, but got: %v", expectedData, result)
 }
 
 func TestStoreRestoreConfig(t *testing.T) {
@@ -94,9 +94,7 @@ func TestStoreRestoreConfig(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			result := StoreRestoreConfig(tc.config)
 
-			if !reflect.DeepEqual(result, tc.expectedData) {
-				t.Errorf("Expected: %v, but got: %v", tc.expectedData, result)
-			}
+			assert.Truef(t, reflect.DeepEqual(result, tc.expectedData), "Expected: %v, but got: %v", tc.expectedData, result)
 		})
 	}
 }
@@ -132,12 +130,11 @@ func TestGetParallelFilesUpload(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			result, err := GetParallelFilesUpload(test.uploaderCfg)
 
-			if result != test.expectedResult {
-				t.Errorf("Expected result %d, but got %d", test.expectedResult, result)
-			}
-
-			if (err == nil && test.expectedError != nil) || (err != nil && test.expectedError == nil) || (err != nil && test.expectedError != nil && err.Error() != test.expectedError.Error()) {
-				t.Errorf("Expected error '%v', but got '%v'", test.expectedError, err)
+			assert.Equalf(t, test.expectedResult, result, "Expected result %d, but got %d", test.expectedResult, result)
+			if test.expectedError != nil {
+				require.EqualError(t, err, test.expectedError.Error(), "Expected error %v, but got %v", test.expectedError, err)
+			} else {
+				assert.NoError(t, err, "Expected no error, but got %v", err)
 			}
 		})
 	}
@@ -180,12 +177,11 @@ func TestGetWriteSparseFiles(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			result, err := GetWriteSparseFiles(test.uploaderCfg)
 
-			if result != test.expectedResult {
-				t.Errorf("Expected result %t, but got %t", test.expectedResult, result)
-			}
-
-			if (err == nil && test.expectedError != nil) || (err != nil && test.expectedError == nil) || (err != nil && test.expectedError != nil && err.Error() != test.expectedError.Error()) {
-				t.Errorf("Expected error '%v', but got '%v'", test.expectedError, err)
+			assert.Equalf(t, test.expectedResult, result, "Expected result %t, but got %t", test.expectedResult, result)
+			if test.expectedError != nil {
+				require.EqualError(t, err, test.expectedError.Error(), "Expected error %v, but got %v", test.expectedError, err)
+			} else {
+				assert.NoError(t, err, "Expected no error, but got %v", err)
 			}
 		})
 	}
@@ -225,18 +221,12 @@ func TestGetRestoreConcurrency(t *testing.T) {
 			result, err := GetRestoreConcurrency(tc.UploaderCfg)
 
 			if tc.ExpectedError {
-				if err.Error() != tc.ExpectedErrorMsg {
-					t.Errorf("Expected error message %s, but got %s", tc.ExpectedErrorMsg, err.Error())
-				}
+				assert.Equalf(t, err.Error(), tc.ExpectedErrorMsg, "Expected error message %s, but got %s", tc.ExpectedErrorMsg, err.Error())
 			} else {
-				if err != nil {
-					t.Errorf("Expected no error, but got %v", err)
-				}
+				assert.NoErrorf(t, err, "Expected no error, but got %v", err)
 			}
 
-			if result != tc.ExpectedResult {
-				t.Errorf("Expected result %d, but got %d", tc.ExpectedResult, result)
-			}
+			assert.Equalf(t, result, tc.ExpectedResult, "Expected result %d, but got %d", tc.ExpectedResult, result)
 		})
 	}
 }

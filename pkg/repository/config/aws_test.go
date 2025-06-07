@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -78,16 +79,12 @@ func TestGetS3ResticEnvVars(t *testing.T) {
 
 			// Avoid direct comparison of expected and actual to prevent exposing secrets.
 			// This may occur if the test doesn't set getS3Credentials func correctly.
-			if !reflect.DeepEqual(tc.expected, actual) {
-				t.Errorf("Expected and actual results do not match for test case %q", tc.name)
-				for key, value := range actual {
-					if expVal, err := tc.expected[key]; !err || expVal != value {
-						if actualVal, ok := actual[key]; !ok {
-							t.Errorf("Key %q is missing in actual result", key)
-						} else if expVal != actualVal {
-							t.Errorf("Key %q: expected value %q", key, expVal)
-						}
-					}
+			require.Falsef(t, !reflect.DeepEqual(tc.expected, actual), "Expected and actual results do not match for test case %q", tc.name)
+			for key, value := range actual {
+				if expVal, err := tc.expected[key]; !err || expVal != value {
+					actualVal, ok := actual[key]
+					require.Truef(t, ok, "Key %q is missing in actual result", key)
+					assert.Equalf(t, expVal, actualVal, "Key %q: expected value %q", key, expVal)
 				}
 			}
 		})
@@ -151,28 +148,19 @@ func TestGetS3CredentialsCorrectlyUseProfile(t *testing.T) {
 
 			tmpFile, err := os.CreateTemp("", "velero-test-aws-credentials")
 			defer os.Remove(tmpFile.Name())
-			if err != nil {
-				t.Errorf("GetS3Credentials() error = %v", err)
-				return
-			}
+			require.NoErrorf(t, err, "GetS3Credentials() error = %v", err)
 			// write the contents of the secret file to the temp file
 			_, err = tmpFile.WriteString(tt.args.secretFileContents)
-			if err != nil {
-				t.Errorf("GetS3Credentials() error = %v", err)
-				return
-			}
+			require.NoErrorf(t, err, "GetS3Credentials() error = %v", err)
 
 			tt.args.config["credentialsFile"] = tmpFile.Name()
 			got, err := GetS3Credentials(tt.args.config)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetS3Credentials() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got.AccessKeyID, tt.want.AccessKeyID) {
-				t.Errorf("GetS3Credentials() want %v", tt.want.AccessKeyID)
-			}
-			if !reflect.DeepEqual(got.SecretAccessKey, tt.want.SecretAccessKey) {
-				t.Errorf("GetS3Credentials() want %v", tt.want.SecretAccessKey)
+			if tt.wantErr {
+				require.Error(t, err, "GetS3Credentials() expected an error but got none")
+			} else {
+				require.NoError(t, err, "GetS3Credentials() expected no error but got: %v", err)
+				assert.Truef(t, reflect.DeepEqual(got.AccessKeyID, tt.want.AccessKeyID), "GetS3Credentials() want %v", tt.want.AccessKeyID)
+				assert.Truef(t, reflect.DeepEqual(got.SecretAccessKey, tt.want.SecretAccessKey), "GetS3Credentials() want %v", tt.want.SecretAccessKey)
 			}
 		})
 	}

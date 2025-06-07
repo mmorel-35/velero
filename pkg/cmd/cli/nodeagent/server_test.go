@@ -100,18 +100,14 @@ func Test_validatePodVolumesHostPath(t *testing.T) {
 			for _, dir := range tt.dirs {
 				if tt.createDir {
 					err := fs.MkdirAll(filepath.Join(nodeagent.HostPodVolumeMountPath(), dir), os.ModePerm)
-					if err != nil {
-						t.Error(err)
-					}
+					assert.NoError(t, err)
 				}
 			}
 
 			kubeClient := fake.NewSimpleClientset()
 			for _, pod := range tt.pods {
 				_, err := kubeClient.CoreV1().Pods(pod.GetNamespace()).Create(context.TODO(), pod, metav1.CreateOptions{})
-				if err != nil {
-					t.Error(err)
-				}
+				assert.NoError(t, err)
 			}
 
 			s := &nodeAgentServer{
@@ -190,7 +186,7 @@ func Test_getDataPathConfigs(t *testing.T) {
 			s.getDataPathConfigs()
 			assert.Equal(t, test.expectConfigs, s.dataPathConfigs)
 			if test.expectLog == "" {
-				assert.Equal(t, "", logBuffer)
+				assert.Empty(t, logBuffer)
 			} else {
 				assert.Contains(t, logBuffer, test.expectLog)
 			}
@@ -408,7 +404,7 @@ func Test_getDataPathConcurrentNum(t *testing.T) {
 			num := s.getDataPathConcurrentNum(defaultNum)
 			assert.Equal(t, test.expectNum, num)
 			if test.expectLog == "" {
-				assert.Equal(t, "", logBuffer)
+				assert.Empty(t, logBuffer)
 			} else {
 				assert.Contains(t, logBuffer, test.expectLog)
 			}

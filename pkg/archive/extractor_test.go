@@ -23,6 +23,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/vmware-tanzu/velero/pkg/test"
@@ -76,12 +77,10 @@ func TestUnzipAndExtractBackup(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = ext.UnzipAndExtractBackup(file.(io.Reader))
-			if tc.wantErr && (err == nil) {
-				t.Errorf("%s: wanted error but got nil", tc.name)
-			}
-
-			if !tc.wantErr && (err != nil) {
-				t.Errorf("%s: wanted no error but got err: %v", tc.name, err)
+			if tc.wantErr {
+				assert.Errorf(t, err, "%s: expected an error but got none", tc.name)
+			} else {
+				assert.NoErrorf(t, err, "%s: expected no error but got: %v", tc.name, err)
 			}
 		})
 	}

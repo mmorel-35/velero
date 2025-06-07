@@ -116,73 +116,69 @@ func TestRestoreFinalizerReconcile(t *testing.T) {
 
 	for _, test := range rfrTests {
 		t.Run(test.name, func(t *testing.T) {
-			if test.restore == nil {
-				return
-			}
+			if test.restore != nil {
+				var (
+					fakeClient    = velerotest.NewFakeControllerRuntimeClientBuilder(t).Build()
+					logger        = velerotest.NewLogger()
+					pluginManager = &pluginmocks.Manager{}
+					backupStore   = &persistencemocks.BackupStore{}
+				)
 
-			var (
-				fakeClient    = velerotest.NewFakeControllerRuntimeClientBuilder(t).Build()
-				logger        = velerotest.NewLogger()
-				pluginManager = &pluginmocks.Manager{}
-				backupStore   = &persistencemocks.BackupStore{}
-			)
+				defer func() {
+					// reset defaultStorageLocation resourceVersion
+					defaultStorageLocation.ObjectMeta.ResourceVersion = ""
+				}()
 
-			defer func() {
-				// reset defaultStorageLocation resourceVersion
-				defaultStorageLocation.ObjectMeta.ResourceVersion = ""
-			}()
+				r := NewRestoreFinalizerReconciler(
+					logger,
+					velerov1api.DefaultNamespace,
+					fakeClient,
+					func(logrus.FieldLogger) clientmgmt.Manager { return pluginManager },
+					NewFakeSingleObjectBackupStoreGetter(backupStore),
+					metrics.NewServerMetrics(),
+					fakeClient,
+					hook.NewMultiHookTracker(),
+					10*time.Minute,
+				)
+				r.clock = testclocks.NewFakeClock(now)
 
-			r := NewRestoreFinalizerReconciler(
-				logger,
-				velerov1api.DefaultNamespace,
-				fakeClient,
-				func(logrus.FieldLogger) clientmgmt.Manager { return pluginManager },
-				NewFakeSingleObjectBackupStoreGetter(backupStore),
-				metrics.NewServerMetrics(),
-				fakeClient,
-				hook.NewMultiHookTracker(),
-				10*time.Minute,
-			)
-			r.clock = testclocks.NewFakeClock(now)
+				if test.restore != nil && test.restore.Namespace == velerov1api.DefaultNamespace {
+					require.NoError(t, r.Client.Create(context.Background(), test.restore))
+					backupStore.On("GetRestoredResourceList", test.restore.Name).Return(map[string][]string{}, nil)
+					backupStore.On("GetRestoreItemOperations", test.restore.Name).Return([]*itemoperation.RestoreOperation{}, nil)
+				}
+				if test.backup != nil {
+					assert.NoError(t, r.Client.Create(context.Background(), test.backup))
+					backupStore.On("GetBackupVolumeInfos", test.backup.Name).Return(nil, nil)
+					pluginManager.On("GetRestoreItemActionsV2").Return(nil, nil)
+					pluginManager.On("CleanupClients")
+				}
+				if test.location != nil {
+					require.NoError(t, r.Client.Create(context.Background(), test.location))
+				}
 
-			if test.restore != nil && test.restore.Namespace == velerov1api.DefaultNamespace {
-				require.NoError(t, r.Client.Create(context.Background(), test.restore))
-				backupStore.On("GetRestoredResourceList", test.restore.Name).Return(map[string][]string{}, nil)
-				backupStore.On("GetRestoreItemOperations", test.restore.Name).Return([]*itemoperation.RestoreOperation{}, nil)
-			}
-			if test.backup != nil {
-				assert.NoError(t, r.Client.Create(context.Background(), test.backup))
-				backupStore.On("GetBackupVolumeInfos", test.backup.Name).Return(nil, nil)
-				pluginManager.On("GetRestoreItemActionsV2").Return(nil, nil)
-				pluginManager.On("CleanupClients")
-			}
-			if test.location != nil {
-				require.NoError(t, r.Client.Create(context.Background(), test.location))
-			}
-
-			_, err = r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{
-				Namespace: test.restore.Namespace,
-				Name:      test.restore.Name,
-			}})
-
-			assert.Equal(t, test.expectError, err != nil)
-			if test.expectError {
-				return
-			}
-
-			if test.statusCompare {
-				restoreAfter := velerov1api.Restore{}
-				err = fakeClient.Get(context.TODO(), types.NamespacedName{
+				_, err = r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{
 					Namespace: test.restore.Namespace,
 					Name:      test.restore.Name,
-				}, &restoreAfter)
+				}})
 
-				require.NoError(t, err)
+				assert.Equal(t, test.expectError, err != nil)
+				if !test.expectError {
+					if test.statusCompare {
+						restoreAfter := velerov1api.Restore{}
+						err = fakeClient.Get(context.TODO(), types.NamespacedName{
+							Namespace: test.restore.Namespace,
+							Name:      test.restore.Name,
+						}, &restoreAfter)
 
-				assert.Equal(t, test.expectPhase, restoreAfter.Status.Phase)
-				assert.Equal(t, test.expectErrsCnt, restoreAfter.Status.Errors)
-				assert.Equal(t, test.expectWarningsCnt, restoreAfter.Status.Warnings)
-				require.True(t, test.expectedCompletedTime.Equal(restoreAfter.Status.CompletionTimestamp))
+						require.NoError(t, err)
+
+						assert.Equal(t, test.expectPhase, restoreAfter.Status.Phase)
+						assert.Equal(t, test.expectErrsCnt, restoreAfter.Status.Errors)
+						assert.Equal(t, test.expectWarningsCnt, restoreAfter.Status.Warnings)
+						require.True(t, test.expectedCompletedTime.Equal(restoreAfter.Status.CompletionTimestamp))
+					}
+				}
 			}
 		})
 	}
@@ -622,11 +618,12 @@ func Test_restoreFinalizerReconciler_finishProcessing(t *testing.T) {
 				resourceTimeout: 1 * time.Second,
 			}
 			restore := builder.ForRestore(velerov1api.DefaultNamespace, "restoreName").Result()
-			if err := r.finishProcessing(velerov1api.RestorePhaseInProgress, restore, restore); (err != nil) != tt.wantErr {
-				t.Errorf("restoreFinalizerReconciler.finishProcessing() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if !tt.args.mockClientAsserts(client) {
-				t.Errorf("mockClientAsserts() failed")
+			err := r.finishProcessing(velerov1api.RestorePhaseInProgress, restore, restore)
+			if tt.wantErr {
+				assert.Error(t, err, "Expected error but got none")
+			} else {
+				assert.NoError(t, err, "Expected no error but got one")
+				assert.Truef(t, tt.args.mockClientAsserts(client), "mockClientAsserts() failed")
 			}
 		})
 	}

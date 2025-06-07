@@ -67,14 +67,10 @@ func TestGenerateJobName1(t *testing.T) {
 			jobName := GenerateJobName(tc.repo)
 
 			// Check if the generated job name starts with the expected prefix
-			if !strings.HasPrefix(jobName, tc.expectedStart) {
-				t.Errorf("generated job name does not start with expected prefix")
-			}
+			assert.Truef(t, strings.HasPrefix(jobName, tc.expectedStart), "generated job name does not start with expected prefix")
 
 			// Check if the length of the generated job name exceeds the Kubernetes limit
-			if len(jobName) > 63 {
-				t.Errorf("generated job name exceeds Kubernetes limit")
-			}
+			assert.LessOrEqualf(t, len(jobName), 63, "generated job name exceeds Kubernetes limit")
 		})
 	}
 }
@@ -289,14 +285,14 @@ func TestGetResultFromJob(t *testing.T) {
 	// test an error should be returned
 	result, err := getResultFromJob(cli, job)
 	assert.EqualError(t, err, "no pod found for job test-job")
-	assert.Equal(t, "", result)
+	assert.Empty(t, result)
 
 	cli = fake.NewClientBuilder().WithObjects(job, pod).Build()
 
 	// test an error should be returned
 	result, err = getResultFromJob(cli, job)
 	assert.EqualError(t, err, "no container statuses found for job test-job")
-	assert.Equal(t, "", result)
+	assert.Empty(t, result)
 
 	// Set a non-terminated container status to the pod
 	pod.Status = corev1api.PodStatus{
@@ -311,7 +307,7 @@ func TestGetResultFromJob(t *testing.T) {
 	cli = fake.NewClientBuilder().WithObjects(job, pod).Build()
 	result, err = getResultFromJob(cli, job)
 	assert.EqualError(t, err, "container for job test-job is not terminated")
-	assert.Equal(t, "", result)
+	assert.Empty(t, result)
 
 	// Set a terminated container status to the pod
 	pod.Status = corev1api.PodStatus{
@@ -328,7 +324,7 @@ func TestGetResultFromJob(t *testing.T) {
 	cli = fake.NewClientBuilder().WithObjects(job, pod).Build()
 	result, err = getResultFromJob(cli, job)
 	assert.NoError(t, err)
-	assert.Equal(t, "", result)
+	assert.Empty(t, result)
 
 	// Set a terminated container status with invalidate message to the pod
 	pod.Status = corev1api.PodStatus{
@@ -346,7 +342,7 @@ func TestGetResultFromJob(t *testing.T) {
 	cli = fake.NewClientBuilder().WithObjects(job, pod).Build()
 	result, err = getResultFromJob(cli, job)
 	assert.EqualError(t, err, "error to locate repo maintenance error indicator from termination message")
-	assert.Equal(t, "", result)
+	assert.Empty(t, result)
 
 	// Set a terminated container status with empty maintenance error to the pod
 	pod.Status = corev1api.PodStatus{
@@ -364,7 +360,7 @@ func TestGetResultFromJob(t *testing.T) {
 	cli = fake.NewClientBuilder().WithObjects(job, pod).Build()
 	result, err = getResultFromJob(cli, job)
 	assert.EqualError(t, err, "nothing after repo maintenance error indicator in termination message")
-	assert.Equal(t, "", result)
+	assert.Empty(t, result)
 
 	// Set a terminated container status with maintenance error to the pod
 	pod.Status = corev1api.PodStatus{

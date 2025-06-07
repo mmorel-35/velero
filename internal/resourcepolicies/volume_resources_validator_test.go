@@ -18,6 +18,7 @@ package resourcepolicies
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -73,9 +74,10 @@ func TestCapacityConditionValidate(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			c := &capacityCondition{capacity: *tc.capacity}
 			err := c.validate()
-
-			if (err != nil) != tc.wantErr {
-				t.Fatalf("Expected error %v, but got error %v", tc.wantErr, err)
+			if tc.wantErr {
+				assert.Errorf(t, err, "Expected error but got none for case: %s", tc.name)
+			} else {
+				assert.NoErrorf(t, err, "Expected no error but got: %v for case: %s", err, tc.name)
 			}
 		})
 	}
@@ -461,13 +463,11 @@ func TestValidate(t *testing.T) {
 			err2 := policies.Validate()
 
 			if tc.wantErr {
-				if err1 == nil && err2 == nil {
-					t.Fatalf("Expected error %v, but not get error", tc.wantErr)
-				}
+				assert.Errorf(t, err1, "Expected error but got none for case: %s", tc.name)
+				assert.Errorf(t, err2, "Expected error but got none for case: %s", tc.name)
 			} else {
-				if err1 != nil || err2 != nil {
-					t.Fatalf("Expected error %v, but got error %v %v", tc.wantErr, err1, err2)
-				}
+				assert.NoErrorf(t, err1, "Expected no error but got: %v for case: %s", err1, tc.name)
+				assert.NoErrorf(t, err2, "Expected no error but got: %v for case: %s", err2, tc.name)
 			}
 		})
 	}
