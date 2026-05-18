@@ -303,6 +303,12 @@ linters:
       # Allow leading comments to be separated with empty lines
       allow-separated-leading-comment: false
 
+    modernize:
+      # List of analyzers to disable.
+      # By default, all analyzers are enabled.
+      disable:
+        - newexpr
+
   default: none
   enable:
     - asasalint
@@ -387,9 +393,6 @@ linters:
       - text: "non-constant format string"
         linters:
           - govet
-      - text: "newexpr:"
-        linters:
-          - modernize
 
     generated: lax
     presets:
