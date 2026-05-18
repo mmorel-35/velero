@@ -325,6 +325,7 @@ linters:
     - importas
     - ineffassign
     - misspell
+    - modernize
     - nakedret
     - nilerr
     - noctx
@@ -386,6 +387,9 @@ linters:
       - text: "non-constant format string"
         linters:
           - govet
+      - text: "newexpr:"
+        linters:
+          - modernize
 
     generated: lax
     presets:
